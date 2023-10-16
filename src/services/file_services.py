@@ -5,7 +5,7 @@ from src.models.models import FileData
 
 
 def upload_file(session: SessionLocal, file: UploadFile, user_id, filename, product_id=None):
-    upload_to_s3(file)
+    # upload_to_s3(file) -- возможно нужно разделить функции по работе с бд и файловым хранилищем.
     db_file = FileData(user_id=user_id, filename=filename, file_path=filename, product_id=product_id)
     session.add(db_file)
     session.commit()
