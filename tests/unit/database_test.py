@@ -2,7 +2,9 @@ import unittest
 from unittest.mock import Mock
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from src.config import config  # Замените "your_module" на актуальное имя вашего модуля
+from src import config
+
+
 class TestGetDB(unittest.TestCase):
 
     def setUp(self):

@@ -1,6 +1,6 @@
-from fastapi import UploadFile
+from src.api.endpoints.router import DomainFile
 from boto3 import client
-from src.config import config
+from src import config
 
 s3 = client('s3',
             aws_access_key_id=config.AWS_ACCESS_KEY_ID,
@@ -8,7 +8,7 @@ s3 = client('s3',
             endpoint_url=config.S3_ENDPOINT_URL)
 
 
-def upload_to_s3(file: UploadFile):
+def upload_to_s3(file: DomainFile):
     s3.upload_fileobj(file.file, 'files', file.filename)
 
 

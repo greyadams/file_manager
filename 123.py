@@ -1,10 +1,9 @@
 from fastapi import FastAPI, UploadFile, File, HTTPException, Path
 from fastapi.responses import JSONResponse
-from sqlalchemy import create_engine, Column, Integer, String
+from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from datetime import datetime
 from boto3 import client
-from src.models.models import FileData, Base
+from src.database.psql.models import FileData
 import magic
 
 
