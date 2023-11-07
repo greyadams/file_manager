@@ -1,4 +1,4 @@
-from src.api.endpoints.router import DomainFile
+from src.storage.domain import DomainFile
 from boto3 import client
 from src import config
 from src.storage.connector import Storage, StorageRepository

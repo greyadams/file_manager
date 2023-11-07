@@ -8,7 +8,11 @@ class Storage(ABC):
         pass
 
     @abstractmethod
-    def delete(self, file: Any, bucket: str):
+    def delete_user_file(self, file: Any, bucket: str):
+        pass
+
+    @abstractmethod
+    def delete_files(self, files: Any, bucket: str):
         pass
 
 

@@ -2,7 +2,7 @@ from datetime import datetime
 
 
 class DomainMetaData:
-    def __init__(self, user_id: int, product_id: int, filename: str, file_path: str):
+    def __init__(self, user_id: int, filename: str, product_id: int = None,  file_path: str = None):
         self.user_id = user_id
         self.product_id = product_id
         self.filename = filename

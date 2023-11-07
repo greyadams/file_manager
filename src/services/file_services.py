@@ -2,27 +2,29 @@ from src.database.domain import DomainMetaData
 from src.database.psql.repository import PostgresRepository, PostgresDatabase
 from sqlalchemy import text
 
-from src.services.s3_services import S3Storage, S3Repository
+from src.storage.s3.s3_converter import S3Storage, S3Repository
 from src.storage.domain import DomainFile
+from src import config
 
 
 def upload_file(domain_meta_data: DomainMetaData,
-                repository: PostgresRepository,
-                database: PostgresDatabase,
                 domain_file: DomainFile,
-                storage: S3Storage,
-                storage_repository: S3Repository,
                 ) -> str:
     # Connect to db
+    database = PostgresDatabase(config.DATABASE_URL)
     database.connect()
 
     # Convert DomainMetaData to FileData
+    repository = PostgresRepository(database)
     file_data = repository.convert(domain_meta_data)
 
+    # Storage operations
+    storage = S3Storage(config.S3_BUCKET)
+    storage_repository = S3Repository(storage)
     file = storage_repository.convert(domain_file)
     url = storage.upload(file, 'files')
-    # First realization of function (with query and exec)
 
+    # First realization of function (with query and exec)
     query = str(text(
         "INSERT INTO file_data (user_id, product_id, filename, file_path, created_at) VALUES (:user_id, :product_id, :filename, :file_path, :created_at)"))
     params = {
@@ -63,12 +65,21 @@ def upload_file(domain_meta_data: DomainMetaData,
 #         return file_info
 #     return None
 
-def delete_file_from_db(domain_meta_data: DomainMetaData, repository: PostgresRepository, database: PostgresDatabase):
+def delete_user_file(domain_meta_data: DomainMetaData, domain_file: DomainFile):
     # Connect to db
+    database = PostgresDatabase(config.DATABASE_URL)
     database.connect()
+
     # Convert DomainMetaData to FileData
-    user_id = domain_meta_data.user_id
-    product_id = domain_meta_data.product_id
+    repository = PostgresRepository(database)
+    file_data = repository.convert(domain_meta_data)
+    user_id = file_data.user_id
+    product_id = file_data.product_id
+    # Storage operations
+    storage = S3Storage(config.S3_BUCKET)
+    storage_repository = S3Repository(storage)
+    file = storage_repository.convert(domain_file)
+    storage.delete_user_file(file, 'files')
 
     # SQL-запрос для удаления записей на основе user_id и product_id
     query = str(text("DELETE FROM file_data WHERE user_id = :user_id AND product_id = :product_id"))
@@ -79,6 +90,36 @@ def delete_file_from_db(domain_meta_data: DomainMetaData, repository: PostgresRe
 
     # Выполняем запрос с использованием метода exec
     database.exec(query, params)
+    return True
+
+
+def get_product_files(domain_meta_data: DomainMetaData):
+    # Connect to db
+    database = PostgresDatabase(config.DATABASE_URL)
+    database.connect()
+
+    repository = PostgresRepository(database)
+    file_data = repository.convert(domain_meta_data)
+    user_id = file_data.user_id
+    product_id = file_data.product_id
+
+    query = str(text("SELECT filename FROM file_data WHERE user_id = :user_id AND product_id = :product_id"))
+    params = {
+        "user_id": user_id,
+        "product_id": product_id
+    }
+    results = database.session.exec(query, params).all()
+    filename_list = []
+    for row in results:
+        filename_list.append({'filename': row[0]})
+    return filename_list
+
+
+def delete_product_files(domain_meta_data: DomainMetaData):
+    storage = S3Storage(config.S3_BUCKET)
+    file_to_delete = get_product_files(domain_meta_data)
+    storage.delete_files(file_to_delete, 'files')
+    return file_to_delete
 # def delete_product_files(session: SessionLocal, user_id: int, product_id: int):
 #     files_to_delete = session.query(FileData).filter_by(user_id=user_id, product_id=product_id).all()
 #     deleted_count = session.query(FileData).filter_by(user_id=user_id, product_id=product_id).delete()
