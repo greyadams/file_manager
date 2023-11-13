@@ -27,11 +27,11 @@ class FileValidations:
 
     @staticmethod
     def check_file_format(file: UploadFile):
-        mime = magic.Magic()
+        mime = magic.Magic(mime=True)
         contents = file.file.read()
         file.file.seek(0)
         file_type = mime.from_buffer(contents)
-        if file_type not in ['image/jpeg', 'image/png']:
+        if file_type not in ['image/jpeg', 'image/png', 'image/jpg']:
             raise HTTPException(status_code=400, detail="File format is not supported.")
         return True
 
