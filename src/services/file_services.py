@@ -1,3 +1,5 @@
+import asyncio
+
 from src.database.domain import DomainMetaData
 from src.database.psql.repository import PostgresRepository, PostgresDatabase
 from sqlalchemy import text
@@ -25,13 +27,13 @@ def upload_file(domain_meta_data: DomainMetaData,
     url = storage.upload(file, 'files')
 
     # First realization of function (with query and exec)
-    query = str(text(
-        "INSERT INTO file_data (user_id, product_id, filename, file_path, created_at) VALUES (:user_id, :product_id, :filename, :file_path, :created_at)"))
+    query = text(
+        'INSERT INTO "FileData" (user_id, product_id, filename, file_path, created_at) VALUES (:user_id, :product_id, :filename, :file_path, :created_at)')
     params = {
         "user_id": file_data.user_id,
         "product_id": file_data.product_id,
         "filename": file_data.filename,
-        "file_path": url,
+        "file_path": str(url),
         "created_at": file_data.created_at
     }
     # Выполняем запрос с использованием метода exec
@@ -45,7 +47,8 @@ def upload_file(domain_meta_data: DomainMetaData,
 
     # Отключаемся от базы данных
     database.disconnect()
-    return url
+    return str(url)
+
 
 
 # def upload_file_v2(database, storage, DomainFile):

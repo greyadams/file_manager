@@ -4,6 +4,7 @@ from src.storage.connector import Storage, StorageRepository
 from src import config
 from boto3 import client
 
+
 from src.storage.domain import DomainFile
 
 
@@ -23,10 +24,11 @@ class S3Storage(Storage):
                          aws_secret_access_key=config.AWS_SECRET_ACCESS_KEY,
                          endpoint_url=config.S3_ENDPOINT_URL)
 
-    def upload(self, file: File, bucket: str) -> str:
-        self.s3.upload_fileobj(file.file, bucket, file.filename)
-        return self.s3.generate_presigned_url('get_object', Params={'Bucket': bucket, 'Key': file.filename})
+    async def upload(self, file: File, bucket: str) -> str:
 
+        self.s3.upload_fileobj(file, bucket, file.filename)
+        # return self.s3.generate_presigned_url('get_object', Params={'Bucket': bucket, 'Key': file.filename})
+        return f"https://{bucket}.s3.amazonaws.com/{file.filename}"
     def delete_user_file(self, file: File, bucket: str):
         self.s3.delete_object(bucket, file.filename)
 
