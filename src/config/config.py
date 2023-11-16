@@ -1,5 +1,0 @@
-DATABASE_URL = 'postgresql://postgres:postgres@localhost:5432/postgres'
-AWS_ACCESS_KEY_ID = 'minioadmin'
-AWS_SECRET_ACCESS_KEY = 'minioadmin'
-S3_ENDPOINT_URL = 'http://localhost:9000'
-S3_BUCKET = 'files'
