@@ -4,7 +4,7 @@ from typing import Any
 
 class Storage(ABC):
     @abstractmethod
-    def upload(self, file: Any, bucket: str):
+    def upload(self, file: Any, bucket: str, file_name: str) -> str:
         pass
 
     @abstractmethod

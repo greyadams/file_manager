@@ -10,10 +10,11 @@ from src.storage.domain import DomainFile
 router = APIRouter()
 
 
-def file_to_domain_file(file: UploadFile = None, filename: str = None) -> DomainFile:
-    if file is None:
-        return DomainFile(None, filename)
-    return DomainFile(file.file, file.filename)
+# def file_to_domain_file(file: UploadFile) -> DomainFile:
+#     return DomainFile(file)
+async def file_to_domain_file(file: UploadFile) -> DomainFile:
+    content = await file.read()
+    return DomainFile(content, file.filename, file.content_type)
 
 
 def file_to_domain_meta_data(user_id: int, filename: str = None, file: UploadFile = None,
@@ -47,7 +48,7 @@ async def upload_user_file(user_id: int = Path(...), file: UploadFile = File(...
     FileValidations.check_file_format(file)
     FileValidations.check_file_size(file)
     if FileValidations.check_file_format(file) and FileValidations.check_file_size(file):
-        domain_file = file_to_domain_file(file)
+        domain_file = await file_to_domain_file(file)
         domain_meta_data = file_to_domain_meta_data(user_id, None, file)
 
         if isinstance(upload_file(domain_meta_data, domain_file), str):

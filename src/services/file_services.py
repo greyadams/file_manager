@@ -24,7 +24,9 @@ def upload_file(domain_meta_data: DomainMetaData,
     storage = S3Storage(config.S3_BUCKET)
     storage_repository = S3Repository(storage)
     file = storage_repository.convert(domain_file)
-    url = storage.upload(file, 'files')
+
+    storage.upload(file, config.S3_BUCKET, file_data.filename)
+    url = f"http://localhost:9000/files/{file_data.filename}"
 
     # First realization of function (with query and exec)
     query = text(
@@ -47,7 +49,7 @@ def upload_file(domain_meta_data: DomainMetaData,
 
     # Отключаемся от базы данных
     database.disconnect()
-    return str(url)
+    return url
 
 
 
